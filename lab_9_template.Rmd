@@ -31,6 +31,8 @@ Use this template to follow along in Lab Week 9. Each code chunk you'll need is 
 
 # a. Load packages 'tidyverse' and 'stargazer':
 
+library(tidyverse)
+library(stargazer)
 
 
 ```
@@ -41,10 +43,12 @@ Use this template to follow along in Lab Week 9. Each code chunk you'll need is 
 
 # a. Read in data as 'homes':
 
+homes <- read_csv("slo_homes.csv")
 
 # b. Filter to only include cities "San Luis Obispo", "Santa Maria-Orcutt", "Atascadero", and "Arroyo Grande", and call this new subset 'homes_sub':
 
-
+homes_sub <- homes %>% 
+  filter(City == "Arroyo Grande" | City == "San Luis Obispo" | City =="Atascadero" | City =="Santa Maria-Orcutt")
 
 ```
 
@@ -106,9 +110,13 @@ Use summary() to view the model output and statistics.
 ```{r saturated}
 
 # a. Saturated model: 
-
+homes_lm1 <- lm(Price ~ City + Bedrooms + Bathrooms + SqFt + PricePerSqFt + Status, data= homes_sub)
+homes_lm1
+#Note, thiss BAD because PricePerSqFt is calculated from the dependent variable Price --- biased overfitting of model results) 
 
 # b. Model summary:
+
+summary(homes_lm1)
 
 ```
 
@@ -117,9 +125,12 @@ The next model: Exclude price per square foot, and bedrooms/bathrooms (since the
 ```{r subset}
 
 # a. Updated model with variables City, SqFt, and Status:
+homes_lm2 <- lm(Price ~ City + SqFt + Status, data= homes_sub)
+homes_lm2
 
 # b. Model summary:
 
+summary(homes_lm2)
 ```
 
 Wait...but what if I wanted everything to be with respect to a Regular sale status? Then I need to change my factor levels. We've done this before, here we'll use a different function (fct_relevel) from *forcats* package in the tidyverse. 
@@ -127,21 +138,23 @@ Wait...but what if I wanted everything to be with respect to a Regular sale stat
 ```{r fct_relevel}
 
 # a. Set Status to class 'factor'
-
+class(homes_sub$Status) #check to see the class 
+homes_sub$Status <- factor(homes_sub$Status)
 
 # b. Check to ensure it's a factor now
-
+class(homes_sub$Status)
 
 # c. Check levels:
-
+levels(homes_sub$Status) #R tells us what levels it has
 
 # d. Reassign reference level of "Status" to "Regular":
-
+homes_sub$Status <-fct_relevel(homes_sub$Status, "Regular") #reassigns levels. this is reassigning the first level, but you could list all 3 in the order you want
 
 # e. Now run the regression again - same equation, but now the reference level is different (Status = Regular): 
 
-
-
+homes_lm3 <- lm(Price ~ City + SqFt + Status, data= homes_sub)
+homes_lm3
+summary(homes_lm3)
 ```
 
 Interpret the coefficients and statistical outcomes above. 
