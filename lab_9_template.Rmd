@@ -169,6 +169,9 @@ Then we can evaluate model diagnostics using the plot() function:
 ```{r diagnostics}
 
 # a. Model diagnostics:
+plot(homes_lm3)
+
+#Overall, heteroscedasticity is OK, residuals normality definitely looks good, and conceptually and mathematically my model is making sense
 
 ```
 
@@ -180,7 +183,13 @@ The AIC is a quantitative metric for model "optimization" that balances complexi
 
 # a. AIC values for each model
 
+sat_aic <- AIC(homes_lm1)
+
+final_aic <- AIC(homes_lm3)
+
 # Answer: which would you pick? 
+#AIC is lower in lm1, so you would think to pick that, but we KNOW that lm1 is worse. Overall, heteroscedasticity for lm3 is OK, residuals normality definitely looks good, and conceptually and mathematically my model is making sense
+#what are we sacrificing for a lower AIC? 
 
 ```
 
@@ -189,6 +198,7 @@ The AIC is a quantitative metric for model "optimization" that balances complexi
 ```{r stargazer, results = 'asis'}
 
 # a. Prepare a nice regression table:
+lm_table <- stargazer(homes_lm1, homes_lm3, type = "html") # can put as many models as you want
 
 
 
@@ -242,8 +252,14 @@ Make predictions for the new data using predict():
 
 # a. Make predictions using the new data frame:
 
+price_predict <- predict(homes_lm3, 
+                         newdata = df_new, 
+                         se.fit= TRUE, 
+                         interval ="confidence")
+
 # b. Bind predictions to the data to make it actually useful:
 
+predict_df <- data.frame(df_new, price_predict)
 
 
 ```
@@ -254,6 +270,11 @@ Then visualize it!
 
 # Create a line graph with square footage on the x-axis, predicted price on y-axis, with color dependent on City and facet_wrapped by sale status (follow along):
 
+predict_graph <- ggplot(predict_df, aes(x= SqFt, y= fit.fit)) +
+  geom_line(aes(color=City)) +
+  facet_wrap(~Status)
+
+predict_graph
 
 ```
 
